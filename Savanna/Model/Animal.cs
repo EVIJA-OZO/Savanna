@@ -6,19 +6,14 @@
     public abstract class Animal
     {
         /// <summary>
-        /// Animal ID.
-        /// </summary>
-        public int Id { get; set; }
-
-        /// <summary>
         /// Coordinate X - row.
         /// </summary>
-        public int XCoordinate { get; set; }
+        public int RowCoordinate { get; set; }
 
         /// <summary>
         /// Coordinate Y - column.
         /// </summary>
-        public int YCoordinate { get; set; }
+        public int ColumnCoordinate { get; set; }
 
         /// <summary>
         /// Animal vision.
@@ -35,14 +30,6 @@
         /// </summary>
         public string? Letter { get; set; }
 
-        private static int id = 0;
-
-        /// <summary>
-        /// Generates new ID.
-        /// </summary>
-        /// <returns>Incremented ID.</returns>
-        protected static int GenerateId() => id++;
-
         /// <summary>
         /// Makes new animal, generates the new animal's coordinates and adds it to list.
         /// </summary>
@@ -51,19 +38,12 @@
         public static void AddAnimal(Animal newAnimal, List<Animal> animals)
         {
             Random random = new();
+            newAnimal.RowCoordinate = random.Next(0, GameParameters.boardRows - 1);
+            newAnimal.ColumnCoordinate = random.Next(0, GameParameters.boardColumns - 1);
 
+            if (!IsCellReserved(newAnimal.RowCoordinate, newAnimal.ColumnCoordinate, animals) && !Game.IsCellOnBoard(newAnimal.RowCoordinate, newAnimal.ColumnCoordinate))
             {
-                newAnimal.XCoordinate = random.Next(0, GameParameters.boardRows - 1);
-                newAnimal.YCoordinate = random.Next(0, GameParameters.boardColumns - 1);
-
-                if (!IsCellReserved(newAnimal.XCoordinate, newAnimal.YCoordinate, animals) && !Game.IsCellOnBoard(newAnimal.XCoordinate, newAnimal.YCoordinate))
-                {
-                    animals.Add(newAnimal);
-                }
-                else
-                {
-                    return;
-                }
+                animals.Add(newAnimal);
             }
         }
 
@@ -84,8 +64,8 @@
         {
             Random random = new();
             AnimalNewCoordinates nextCoordinatesToMove = newAnimalsCoordinates[random.Next(0, newAnimalsCoordinates.Count)];
-            animal.XCoordinate = nextCoordinatesToMove.NewXCoordinate;
-            animal.YCoordinate = nextCoordinatesToMove.NewYCoordinate;
+            animal.RowCoordinate = nextCoordinatesToMove.NewRowCoordinate;
+            animal.ColumnCoordinate = nextCoordinatesToMove.NewColumnCoordinate;
         }
 
         /// <summary>
@@ -97,18 +77,22 @@
         protected static List<AnimalNewCoordinates> FreeCellsToMove(List<Animal> animals, Animal animal)
         {
             List<AnimalNewCoordinates> newAnimalsCoordinates = new();
+
+            /// <summary>
+            /// Contains new animal coordinates for possible next move.
+            /// </summary>
             AnimalNewCoordinates newCoordinates;
 
-            for (int newYCoordinate = animal.YCoordinate - 1; newYCoordinate <= animal.YCoordinate + 1; newYCoordinate++)
+            for (int newColumnCoordinate = animal.ColumnCoordinate - 1; newColumnCoordinate <= animal.ColumnCoordinate + 1; newColumnCoordinate++)
             {
-                for (int newXCoordinate = animal.XCoordinate - 1; newXCoordinate <= animal.XCoordinate + 1; newXCoordinate++)
+                for (int newRowCoordinate = animal.RowCoordinate - 1; newRowCoordinate <= animal.RowCoordinate + 1; newRowCoordinate++)
                 {
-                    if (!IsCellReserved(newYCoordinate, newXCoordinate, animals) && !Game.IsCellOnBoard(newYCoordinate, newXCoordinate))
+                    if (!IsCellReserved(newColumnCoordinate, newRowCoordinate, animals) && !Game.IsCellOnBoard(newColumnCoordinate, newRowCoordinate))
                     {
                         newCoordinates = new AnimalNewCoordinates
                         {
-                            NewYCoordinate = newYCoordinate,
-                            NewXCoordinate = newXCoordinate
+                            NewColumnCoordinate = newColumnCoordinate,
+                            NewRowCoordinate = newRowCoordinate
                         };
 
                         newAnimalsCoordinates.Add(newCoordinates);
@@ -118,8 +102,8 @@
 
             newCoordinates = new AnimalNewCoordinates
             {
-                NewYCoordinate = animal.YCoordinate,
-                NewXCoordinate = animal.XCoordinate
+                NewColumnCoordinate = animal.ColumnCoordinate,
+                NewRowCoordinate = animal.RowCoordinate
             };
 
             newAnimalsCoordinates.Add(newCoordinates);
@@ -129,23 +113,14 @@
         /// <summary>
         /// Checks if cell is reserved.
         /// </summary>
-        /// <param name="newXCoordinate">New X position.</param>
-        /// <param name="newYCoordinate">New Y position.</param>
+        /// <param name="newRowCoordinate">New row position.</param>
+        /// <param name="newColumnCoordinate">New column position.</param>
         /// <param name="animals">List of animals.</param>
         /// <returns>Is cell reserved.</returns>
-        private static bool IsCellReserved(int newXCoordinate, int newYCoordinate, List<Animal> animals)
+        private static bool IsCellReserved(int newRowCoordinate, int newColumnCoordinate, List<Animal> animals)
         {
-            for (int element = 0; element < animals.Count; element++)
-            {
-                Animal? animal = animals[element];
-                if (animal.XCoordinate.Equals(newXCoordinate) && animal.YCoordinate.Equals(newYCoordinate))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+            return animals.Where(animal => animal.RowCoordinate.Equals(newRowCoordinate) && animal.ColumnCoordinate.Equals(newColumnCoordinate)).Any();
+        }   
 
         /// <summary>
         /// Looks around game field from animals based on it vision.
@@ -162,21 +137,21 @@
         }
 
         /// <summary>
-        /// Returns all animals in the range of vision, excluding itself.
+        /// Returns if there are searched animals in the range of vision, excluding itself.
         /// </summary>
         /// <param name="currentAnimal">Current animal.</param>
         /// <param name="animalForSearch">Animal for search.</param>
         /// <param name="vision">How many cells animal can sense other animals.</param>
-        /// <returns>Are the animals in the range of vision, excluding itself.</returns>
+        /// <returns>True if there are animals in the range of vision, excluding itself. Otherwise - false.</returns>
         private static bool AnimalsAreInRange(Animal currentAnimal, Animal animalForSearch, int vision)
         {
-            bool isOwnPosition = currentAnimal.YCoordinate == animalForSearch.YCoordinate &&
-                                 currentAnimal.XCoordinate == animalForSearch.XCoordinate;
+            bool isOwnPosition = currentAnimal.ColumnCoordinate == animalForSearch.ColumnCoordinate &&
+                                 currentAnimal.RowCoordinate == animalForSearch.RowCoordinate;
             return !isOwnPosition &&
-                    animalForSearch.YCoordinate >= currentAnimal.YCoordinate - vision &&
-                    animalForSearch.YCoordinate <= currentAnimal.YCoordinate + vision &&
-                    animalForSearch.XCoordinate >= currentAnimal.XCoordinate - vision &&
-                    animalForSearch.XCoordinate <= currentAnimal.XCoordinate + vision;
+                    animalForSearch.ColumnCoordinate >= currentAnimal.ColumnCoordinate - vision &&
+                    animalForSearch.ColumnCoordinate <= currentAnimal.ColumnCoordinate + vision &&
+                    animalForSearch.RowCoordinate >= currentAnimal.RowCoordinate - vision &&
+                    animalForSearch.RowCoordinate <= currentAnimal.RowCoordinate + vision;
         }
 
         /// <summary>
@@ -186,11 +161,10 @@
         /// <param name="animal">Current animal.</param>
         /// <param name="animals">List of animals.</param>
         /// <returns>List of animals around by type.</returns>
-        public List<T> AnimalsInRange<T>(Animal animal, List <Animal> animals) where T : Animal
+        public List<T> AnimalsInRange<T>(Animal animal, List<Animal> animals) where T : Animal
         {
-                IEnumerable<Animal> animalsAround = LookAround(animal, animals, animal.Vision);
-
-                return animalsAround.Where(animal => typeof(T).IsAssignableTo(animal.GetType())).Select(animal => (T)animal).ToList();
+            IEnumerable<Animal> animalsAround = LookAround(animal, animals, animal.Vision);
+            return animalsAround.Where(animal => typeof(T).IsAssignableTo(animal.GetType())).Select(animal => (T)animal).ToList();
         }
     }
 }

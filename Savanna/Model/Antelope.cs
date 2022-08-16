@@ -7,7 +7,6 @@
         /// </summary>
         public Antelope()
         {
-            Id = GenerateId();
             Vision = GameParameters.vision;
             IsAlive = true;
             Letter = GameMessages.antilopeLetter;
@@ -41,46 +40,33 @@
         /// </summary>
         /// <param name="lionsAround">List of lions in current animal vision range.</param>
         /// <param name="antilope">Current animal.</param>
-        /// <returns></returns>
+        /// <returns>Returns closest lion with all parameters to current antelope.</returns>
         private Animal? FindNearestLion(List<Lion> lionsAround, Animal antelope)
         {
             Animal? nearestLion = null;
-
-            if (lionsAround.Count != 0)
-            {
-                nearestLion = CalculateClosestLion(lionsAround, antelope);
-            }
-
-            return nearestLion;
-        }
-
-        /// <summary>
-        /// Calculates closest lion to the antelope.
-        /// </summary>
-        /// <param name="lionsAround">List of lions in current animal vision range.</param>
-        /// <param name="antelope">Current animal.</param>
-        /// <returns>Index of closest lion to current antelope.</returns>
-        private Animal? CalculateClosestLion(List<Lion> lionsAround, Animal antelope)
-        {
             int nearestLionIndex = 0;
             int count = 0;
             double lionDistance;
             double minLionDistance = double.MaxValue;
 
-            foreach (var lion in lionsAround)
+            if (lionsAround.Count != 0)
             {
-                lionDistance = Math.Pow(antelope.XCoordinate - lion.XCoordinate, 2) + Math.Pow(antelope.YCoordinate - lion.YCoordinate, 2);
-
-                if (minLionDistance > lionDistance)
+                foreach (var lion in lionsAround)
                 {
-                    minLionDistance = lionDistance;
-                    nearestLionIndex = count;
-                }
+                    lionDistance = Math.Pow(antelope.RowCoordinate - lion.RowCoordinate, 2) + Math.Pow(antelope.ColumnCoordinate - lion.ColumnCoordinate, 2);
 
-                count++;
+                    if (minLionDistance > lionDistance)
+                    {
+                        minLionDistance = lionDistance;
+                        nearestLionIndex = count;
+                    }
+
+                    count++;
+                }
+                nearestLion = lionsAround[nearestLionIndex];
             }
 
-            return lionsAround[nearestLionIndex];
+            return nearestLion;
         }
 
         /// <summary>
@@ -91,8 +77,8 @@
         /// <param name="newAnimalsCoordinates">List of free cells for possible move for current animal.</param>
         private void RunAway(Animal nearestLion, Antelope antelope, List<AnimalNewCoordinates> newAnimalsCoordinates)
         {
-            antelope.XCoordinate = newAnimalsCoordinates[CalculateMaxDistanceFromLion(newAnimalsCoordinates, nearestLion)].NewXCoordinate;
-            antelope.YCoordinate = newAnimalsCoordinates[CalculateMaxDistanceFromLion(newAnimalsCoordinates, nearestLion)].NewYCoordinate;
+            antelope.RowCoordinate = newAnimalsCoordinates[CalculateMaxDistanceFromLion(newAnimalsCoordinates, nearestLion)].NewRowCoordinate;
+            antelope.ColumnCoordinate = newAnimalsCoordinates[CalculateMaxDistanceFromLion(newAnimalsCoordinates, nearestLion)].NewColumnCoordinate;
         }
 
         /// <summary>
@@ -110,7 +96,7 @@
 
             foreach (var cell in newAnimalsCoordinates)
             {
-                lionDistance = Math.Pow(cell.NewXCoordinate - lion.XCoordinate, 2) + Math.Pow(cell.NewYCoordinate - lion.YCoordinate, 2);
+                lionDistance = Math.Pow(cell.NewRowCoordinate - lion.RowCoordinate, 2) + Math.Pow(cell.NewColumnCoordinate - lion.ColumnCoordinate, 2);
 
                 if (maxLionDistance < lionDistance)
                 {

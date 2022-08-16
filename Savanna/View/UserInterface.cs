@@ -5,9 +5,9 @@
         /// <summary>
         /// Makes view of the game field.
         /// </summary>
-        /// <param name="args">Array containing the game field.</param>
+        /// <param name="gameField">Array containing the game field.</param>
         /// <param name="game">Current game generation.</param>
-        public static void Display(string[,] args, Game game)
+        public static void Board(string[,] gameField, Game game)
         {
             Console.Clear();
             Console.WriteLine(GameMessages.welcomeMessage);
@@ -17,7 +17,7 @@
             {
                 for (int column = 0; column < GameParameters.boardColumns; column++)
                 {
-                    Console.Write(args[column, row]);
+                    Console.Write(gameField[column, row]);
                 }
 
                 Console.WriteLine();

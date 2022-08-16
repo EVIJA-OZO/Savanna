@@ -36,27 +36,27 @@
         /// <summary>
         /// Checks if cell is on the board.
         /// </summary>
-        /// <param name="newXCoordinate">New X coordinate.</param>
-        /// <param name="newYCoordinate">New Y coordinate.</param>
+        /// <param name="newRowCoordinate">New rox coordinate.</param>
+        /// <param name="newColumnCoordinate">New column coordinate.</param>
         /// <returns>Is cell on board.</returns>
-        public static bool IsCellOnBoard(int newYCoordinate, int newXCoordinate)
+        public static bool IsCellOnBoard(int newColumnCoordinate, int newRowCoordinate)
         {
-            return (newYCoordinate < 0) ||
-                   (newYCoordinate > GameParameters.boardColumns - 1) ||
-                   (newXCoordinate < 0) ||
-                   (newXCoordinate > GameParameters.boardRows - 1);
+            return (newColumnCoordinate < 0) ||
+                   (newColumnCoordinate > GameParameters.boardColumns - 1) ||
+                   (newRowCoordinate < 0) ||
+                   (newRowCoordinate > GameParameters.boardRows - 1);
         }
 
         /// <summary>
         /// Fills the game field with the first animals' letter. 
         /// </summary>
         /// <param name="animals">List of animals.</param>
-        /// <param name="args">Array containing the game field.</param>
-        public static void FillGameFieldWithAnimals(List<Animal> animals, string[,] args)
+        /// <param name="gameField">Array containing the game field.</param>
+        public static void FillGameFieldWithAnimals(List<Animal> animals, string[,] gameField)
         {
             foreach (var animal in animals)
             {
-                args[animal.YCoordinate, animal.XCoordinate] = animal.Letter;
+                gameField[animal.ColumnCoordinate, animal.RowCoordinate] = animal.Letter;
             }
         }
 
@@ -64,12 +64,12 @@
         /// Removes animal from game field.
         /// </summary>
         /// <param name="animals">List of animals.</param>
-        /// <param name="args">Array containing the game field.</param>
-        public static void RemoveAnimalFromBoard(List<Animal> animals, string[,] args)
+        /// <param name="gameField">Array containing the game field.</param>
+        public static void RemoveAnimalFromBoard(List<Animal> animals, string[,] gameField)
         {
             foreach (Animal animal in animals)
             {
-                args[animal.YCoordinate, animal.XCoordinate] = GameMessages.emptyCell;
+                gameField[animal.ColumnCoordinate, animal.RowCoordinate] = GameMessages.emptyCell;
             }
         }
     }

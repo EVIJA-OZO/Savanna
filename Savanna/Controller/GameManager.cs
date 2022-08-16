@@ -21,7 +21,7 @@
             while (gameOn)
             {
                 Game.FillGameFieldWithAnimals(animals, game.GameField);
-                UserInterface.Display(game.GameField, game);
+                UserInterface.Board(game.GameField, game);
                 Game.RemoveAnimalFromBoard(animals, game.GameField);
 
                 foreach (Animal animal in animals)
