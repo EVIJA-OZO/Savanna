@@ -119,7 +119,7 @@
         /// <returns>Is cell reserved.</returns>
         private static bool IsCellReserved(int newRowCoordinate, int newColumnCoordinate, List<Animal> animals)
         {
-            return animals.Where(animal => animal.RowCoordinate.Equals(newRowCoordinate) && animal.ColumnCoordinate.Equals(newColumnCoordinate)).Any();
+            return animals.Any(animal => animal.RowCoordinate.Equals(newRowCoordinate) && animal.ColumnCoordinate.Equals(newColumnCoordinate));
         }   
 
         /// <summary>
