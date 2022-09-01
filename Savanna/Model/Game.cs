@@ -72,5 +72,14 @@
                 gameField[animal.ColumnCoordinate, animal.RowCoordinate] = GameMessages.emptyCell;
             }
         }
+
+        /// <summary>
+        /// Removes dead animals from list.
+        /// </summary>
+        /// <param name="animals">List of animals.</param>
+        public static void RemoveDeadAnimals(List<Animal> animals)
+        {
+            animals.RemoveAll(animal => animal.IsAlive = false);
+        }
     }
 }

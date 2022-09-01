@@ -8,6 +8,7 @@
         public Lion()
         {
             Vision = GameParameters.vision;
+            Health = GameParameters.health;
             IsAlive = true;
             Letter = GameMessages.lionLetter;
         }
@@ -33,6 +34,8 @@
             {
                 Hunt(nearestAntelope, lion, newAnimalsCoordinates);
             }
+
+            lion.Health -= GameParameters.healthDecreaser;
         }
 
         /// <summary>
@@ -79,6 +82,11 @@
         {
             lion.ColumnCoordinate = newAnimalsCoordinates[CalculateMinDistanceToAntelope(newAnimalsCoordinates, nearestAntelope)].NewColumnCoordinate;
             lion.RowCoordinate = newAnimalsCoordinates[CalculateMinDistanceToAntelope(newAnimalsCoordinates, nearestAntelope)].NewRowCoordinate;
+
+            if (nearestAntelope.RowCoordinate - lion.RowCoordinate <= 1 && nearestAntelope.ColumnCoordinate - lion.ColumnCoordinate <= 1)
+            {
+                EatAntelope(lion, nearestAntelope);
+            }
         }
 
         /// <summary>
@@ -108,6 +116,50 @@
             }
 
             return closestToAntelopeIndex;
+        }
+
+        /// <summary>
+        /// Decrease nearest hunted antelope health and increases lion health. 
+        /// If antelopes health is zero - kills animal.
+        /// </summary>
+        /// <param name="lion">Current lion.</param>
+        /// <param name="antelope">Currently closest hunted antelope.</param>
+        private void EatAntelope(Lion lion, Animal antelope)
+        {
+            antelope.Health = antelope.Health <= 0 ? 0 : antelope.Health - 20;
+            lion.Health = lion.Health >= GameParameters.health ? GameParameters.health : lion.Health + 20;
+
+            if (antelope.Health == 0)
+            {
+                lion.RowCoordinate = antelope.RowCoordinate;
+                lion.ColumnCoordinate = antelope.ColumnCoordinate;
+                antelope.IsAlive = false;
+                lion.Health = GameParameters.health;
+            }
+        }
+
+        /// <summary>
+        /// Gives birth of a new animal.
+        /// </summary>
+        /// <param name="animal">Current animal.</param>
+        /// <param name="animals">List of animals.</param>
+        /// <returns>New animal.</returns>
+        public override Animal? GiveBirth(Animal animal, List<Animal> animals)
+        {
+            Lion lion = (Lion)animal;
+            AnimalNewCoordinates birthCoordinates = FreeCellsToBirth(lion, animals);
+            Animal? child = null;
+
+            if (birthCoordinates != null)
+            {
+                child = new Lion
+                {
+                    RowCoordinate = birthCoordinates.NewRowCoordinate,
+                    ColumnCoordinate = birthCoordinates.NewColumnCoordinate
+                };
+            }
+
+            return child;
         }
     }
 }
