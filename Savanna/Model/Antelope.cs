@@ -8,6 +8,7 @@
         public Antelope()
         {
             Vision = GameParameters.vision;
+            Health = GameParameters.health;
             IsAlive = true;
             Letter = GameMessages.antilopeLetter;
         }
@@ -33,6 +34,8 @@
             {
                 RunAway(nearestLion, antelope, newAnimalsCoordinates);
             }
+
+            antelope.Health -= GameParameters.healthDecreaser;
         }
 
         /// <summary>
@@ -108,6 +111,30 @@
             }
 
             return farestFromLionIndex;
+        }
+
+        /// <summary>
+        /// Gives birth of a new animal.
+        /// </summary>
+        /// <param name="animal">Current animal.</param>
+        /// <param name="animals">List of animals.</param>
+        /// <returns>New animal.</returns>
+        public override Animal? GiveBirth(Animal animal, List<Animal> animals)
+        {
+            Antelope antelope = (Antelope)animal;
+            AnimalNewCoordinates birthCoordinates = FreeCellsToBirth(antelope, animals);
+            Animal? child = null;
+
+            if (birthCoordinates != null)
+            {
+                child = new Antelope
+                {
+                    RowCoordinate = birthCoordinates.NewRowCoordinate,
+                    ColumnCoordinate = birthCoordinates.NewColumnCoordinate
+                };
+            }
+
+            return child;
         }
     }
 }

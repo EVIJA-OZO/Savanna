@@ -21,9 +21,19 @@
         public int Vision { get; set; }
 
         /// <summary>
+        /// Animal health.
+        /// </summary>
+        public double Health { get; set; }
+
+        /// <summary>
         /// Indicates if animal is alive.
         /// </summary>
         public bool IsAlive { get; set; }
+
+        /// <summary>
+        /// Indicates if animal has a pair.
+        /// </summary>
+        public bool HasAPair { get; set; } = false;
 
         /// <summary>
         /// Symbol for animal on a game field.
@@ -78,9 +88,7 @@
         {
             List<AnimalNewCoordinates> newAnimalsCoordinates = new();
 
-            /// <summary>
             /// Contains new animal coordinates for possible next move.
-            /// </summary>
             AnimalNewCoordinates newCoordinates;
 
             for (int newColumnCoordinate = animal.ColumnCoordinate - 1; newColumnCoordinate <= animal.ColumnCoordinate + 1; newColumnCoordinate++)
@@ -120,7 +128,7 @@
         private static bool IsCellReserved(int newRowCoordinate, int newColumnCoordinate, List<Animal> animals)
         {
             return animals.Any(animal => animal.RowCoordinate.Equals(newRowCoordinate) && animal.ColumnCoordinate.Equals(newColumnCoordinate));
-        }   
+        }
 
         /// <summary>
         /// Looks around game field from animals based on it vision.
@@ -165,6 +173,44 @@
         {
             IEnumerable<Animal> animalsAround = LookAround(animal, animals, animal.Vision);
             return animalsAround.Where(animal => typeof(T).IsAssignableTo(animal.GetType())).Select(animal => (T)animal).ToList();
+        }
+
+        /// <summary>
+        /// Gives birth to a new animal.
+        /// </summary>
+        /// <param name="animal">Current animal.</param>
+        /// <param name="animals">List of animals.</param>
+        /// <returns>New animal (child).</returns>
+        public abstract Animal? GiveBirth(Animal animal, List<Animal> animals);
+
+        /// <summary>
+        /// Calculates first free cells for birth for new animal.
+        /// </summary>
+        /// <param name="animal">Current animal.</param>
+        /// <param name="animals">List of animals.</param>
+        /// <returns>New animal coordinates for child to birth.</returns>
+        protected AnimalNewCoordinates? FreeCellsToBirth(Animal animal, List<Animal> animals)
+        {
+            AnimalNewCoordinates? newCoordinates = null;
+
+            for (int newRowCoordinate = RowCoordinate - 1; newRowCoordinate <= RowCoordinate + 1; newRowCoordinate++)
+            {
+                for (int newColumnCoordinate = ColumnCoordinate - 1; newColumnCoordinate <= ColumnCoordinate + 1; newColumnCoordinate++)
+                {
+                    if (!IsCellReserved(newColumnCoordinate, newRowCoordinate, animals) && !Game.IsCellOnBoard(newColumnCoordinate, newRowCoordinate))
+                    {
+                        newCoordinates = new AnimalNewCoordinates
+                        {
+                            NewRowCoordinate = newRowCoordinate,
+                            NewColumnCoordinate = newColumnCoordinate
+                        };
+
+                        break;
+                    }
+                }
+            }
+
+            return newCoordinates;
         }
     }
 }
